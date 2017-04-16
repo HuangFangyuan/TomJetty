@@ -13,15 +13,14 @@ import java.nio.channels.SocketChannel;
  */
 public class Client {
 
-    @Test
     public void sendMessage(){
 
         SocketChannel client = null;
         try {
-            client = SocketChannel.open(new InetSocketAddress("127.0.0.1",9611));
+            client = SocketChannel.open(new InetSocketAddress("127.0.0.1",10086));
             client.configureBlocking(false);
             ByteBuffer buffer = ByteBuffer.allocate(1024);
-            buffer.put("你好呀服务器".getBytes());
+            buffer.put("GET /hello.jsp HTTP/1.1 ".getBytes());
             buffer.flip();
             client.write(buffer);
             buffer.clear();

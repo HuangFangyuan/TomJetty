@@ -1,36 +1,36 @@
 package com.hfy.tomjetty.server;
 
-import com.hfy.tomjetty.client.Client;
 import com.hfy.tomjetty.utils.TomJettyUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by HuangFangyuan on 2017/4/15.
  */
-public class TomJetty implements Runnable{
+public class Connector implements Runnable{
 
     private ServerSocketChannel server;
+    private boolean shutdown = false;
 
-    @Override
-    public void run() {
+    public void await(){
         try {
             server = ServerSocketChannel.open();
+            //设置为非阻塞
             server.configureBlocking(false);
-//            int port = Integer.parseInt(TomJettyUtil.getValue("tomjetty.port"));
-            server.bind(new InetSocketAddress(9611));
+            int port = Integer.parseInt(TomJettyUtil.getValue("tomjetty.port"));
+            server.bind(new InetSocketAddress(10086));
             //选择器
             Selector selector = Selector.open();
-            SelectionKey i =server.register(selector, SelectionKey.OP_ACCEPT);
+            //注册感兴趣的事件
+            server.register(selector, SelectionKey.OP_ACCEPT);
+            //选择已就绪的事件，阻塞直到一个就绪
             while (selector.select()>0){
                 Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
                 while (keys.hasNext()){
@@ -42,36 +42,23 @@ public class TomJetty implements Runnable{
                     }
                     else if (key.isReadable()){
                         SocketChannel socketChannel = (SocketChannel) key.channel();
-                        handleRead(socketChannel);
+                        Processor processor = new Processor(this);
+                        processor.process(socketChannel);
                     }
+                    //删除
+                    keys.remove();
                 }
-                keys.remove();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void handleRead(SocketChannel socketChannel){
-
-        try {
-            ByteBuffer buffer = ByteBuffer.allocate(1024);
-            while (socketChannel.read(buffer)>0) {
-                buffer.flip();
-                System.out.println(new String(buffer.array()));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void openServer(){
-        new Thread(new TomJetty()).start();
+    @Override
+    public void run() {
+        while (!shutdown){
+            await();
+        }
     }
 
-    public static void main(String[] args) {
-        TomJetty.openServer();
-        Client client = new Client();
-    }
 }
