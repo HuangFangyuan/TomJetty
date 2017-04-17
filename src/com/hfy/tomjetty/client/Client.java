@@ -1,8 +1,6 @@
 package com.hfy.tomjetty.client;
 
 
-import org.junit.Test;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

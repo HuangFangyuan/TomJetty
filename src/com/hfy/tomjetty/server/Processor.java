@@ -1,8 +1,5 @@
 package com.hfy.tomjetty.server;
 
-import com.hfy.tomjetty.utils.TomJettyUtil;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
@@ -19,7 +16,8 @@ public class Processor {
     }
 
     //处理传进来的信道
-    public void process(SocketChannel socketChannel){
+    public HttpRequestHeader process(SocketChannel socketChannel){
+        HttpRequestHeader header = null;
         try {
             ByteBuffer buffer = ByteBuffer.allocate(1024);
             StringBuilder sb = new StringBuilder();
@@ -30,14 +28,8 @@ public class Processor {
                 buffer.clear();
             }
             HttpHeaderParser parser = new HttpHeaderParser();
-            HttpRequestHeader header = parser.parse(sb.toString());
+            header = parser.parse(sb.toString());
             System.out.println(header);
-            ByteBuffer writeBuffer = ByteBuffer.allocate(1024);
-            File file = new File(TomJettyUtil.getValue("tomjetty.webapps"),header.getUrl());
-
-            socketChannel.write(writeBuffer);
-            buffer.clear();
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -46,6 +38,7 @@ public class Processor {
             } catch (Exception e){
                 e.printStackTrace();
             }
+            return header;
         }
     }
 }

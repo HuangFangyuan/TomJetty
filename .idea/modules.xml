@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/TomJetty.iml" filepath="$PROJECT_DIR$/TomJetty.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tomjetty.iml" filepath="$PROJECT_DIR$/tomjetty.iml" />
     </modules>
   </component>
 </project>

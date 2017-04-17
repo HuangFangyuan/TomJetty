@@ -4,7 +4,6 @@ import com.hfy.tomjetty.utils.TomJettyUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -18,6 +17,7 @@ public class Connector implements Runnable{
 
     private ServerSocketChannel server;
     private boolean shutdown = false;
+    private SimpleWrapper wrapper;
 
     public void await(){
         try {
@@ -43,7 +43,11 @@ public class Connector implements Runnable{
                     else if (key.isReadable()){
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         Processor processor = new Processor(this);
-                        processor.process(socketChannel);
+                        HttpRequestHeader header = processor.process(socketChannel);
+                        HttpServletRequest request = getRequest();
+                        request.setHeader(header);
+                        HttpServletResponse response = getResponse();
+                        wrapper.invoke(request,response);
                     }
                     //删除
                     keys.remove();
@@ -56,9 +60,25 @@ public class Connector implements Runnable{
 
     @Override
     public void run() {
-        while (!shutdown){
-            await();
-        }
+        await();
     }
+
+    public SimpleWrapper getWrapper() {
+        return wrapper;
+    }
+
+    public void setWrapper(SimpleWrapper wrapper) {
+        this.wrapper = wrapper;
+    }
+
+    public HttpServletRequest getRequest(){
+        return new HttpServletRequest();
+    }
+
+    public HttpServletResponse getResponse(){
+        return new HttpServletResponse();
+    }
+
+
 
 }
