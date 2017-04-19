@@ -1,11 +1,11 @@
-package com.hfy.tomjetty.server;
+package com.hfy.tomjetty.valve;
 
 import com.hfy.tomjetty.interfaces.*;
 
 /**
  * Created by HuangFangyuan on 2017/4/17.
  */
-public class SimpleValve implements Valve {
+public class StandradContextValve implements Valve {
 
     Container container;
     @Override
@@ -15,9 +15,7 @@ public class SimpleValve implements Valve {
 
     @Override
     public void invoke(Request request, Response response, ValveContext context) {
-        context.invokeNext(request,response);
-        System.out.println("this is a valve");
-        System.out.println(request.getHeader());
+        System.out.println("this is basic valve");
     }
 
     @Override

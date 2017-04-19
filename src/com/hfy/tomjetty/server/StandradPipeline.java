@@ -5,13 +5,13 @@ import com.hfy.tomjetty.interfaces.*;
 /**
  * Created by HuangFangyuan on 2017/4/17.
  */
-public class SimplePipeline implements Pipeline {
+public class StandradPipeline implements Pipeline,Lifecycle {
 
     private Container container = null;
     private Valve basic = null;
-    private Valve[] valves = new SimpleValve[0];
+    private Valve[] valves = new Valve[0];
 
-    SimplePipeline(Container container){
+    StandradPipeline(Container container){
         this.container = container;
     }
 
@@ -25,10 +25,10 @@ public class SimplePipeline implements Pipeline {
         valve.setContainer(this.container);
 
         synchronized (valves){
-            Valve[] newArray = new SimpleValve[valves.length+1];
-            System.arraycopy(valves,0,newArray,0,valves.length);
-            newArray[valves.length] = valve;
-            valves = newArray;
+            Valve[] newValavs = new Valve[valves.length+1];
+            System.arraycopy(valves,0,newValavs,0,valves.length);
+            newValavs[valves.length] = valve;
+            valves = newValavs;
         }
     }
 
@@ -45,6 +45,26 @@ public class SimplePipeline implements Pipeline {
     @Override
     public Valve getBasic() {
         return basic;
+    }
+
+    @Override
+    public void strat() {
+        System.out.println("pipline start");
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void addLifecycleListener(LifecycleListener listener) {
+
+    }
+
+    @Override
+    public LifecycleListener[] findLifecycleListeners() {
+        return new LifecycleListener[0];
     }
 
     class StandardValveContext implements ValveContext {

@@ -1,5 +1,6 @@
 package com.hfy.tomjetty.server;
 
+import com.hfy.tomjetty.interfaces.Container;
 import com.hfy.tomjetty.utils.TomJettyUtil;
 
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
+import java.util.concurrent.*;
 
 /**
  * Created by HuangFangyuan on 2017/4/15.
@@ -17,7 +19,8 @@ public class Connector implements Runnable{
 
     private ServerSocketChannel server;
     private boolean shutdown = false;
-    private SimpleWrapper wrapper;
+    private Container container;
+    private ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     public void await(){
         try {
@@ -32,6 +35,7 @@ public class Connector implements Runnable{
             server.register(selector, SelectionKey.OP_ACCEPT);
             //选择已就绪的事件，阻塞直到一个就绪
             while (selector.select()>0){
+                if (shutdown)break;
                 Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
                 while (keys.hasNext()){
                     SelectionKey key = keys.next();
@@ -43,11 +47,17 @@ public class Connector implements Runnable{
                     else if (key.isReadable()){
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         Processor processor = new Processor(this);
-                        HttpRequestHeader header = processor.process(socketChannel);
+//                        HttpRequestHeader header = processor.process(socketChannel);
+                        processor.setSocketChannel(socketChannel);
+                        Future<HttpRequestHeader> future = executorService.submit(processor);
                         HttpServletRequest request = getRequest();
-                        request.setHeader(header);
+                        try {
+                            request.setHeader(future.get());
+                        } catch (InterruptedException | ExecutionException e) {
+                            e.printStackTrace();
+                        }
                         HttpServletResponse response = getResponse();
-                        wrapper.invoke(request,response);
+                        container.invoke(request,response);
                     }
                     //删除
                     keys.remove();
@@ -63,12 +73,12 @@ public class Connector implements Runnable{
         await();
     }
 
-    public SimpleWrapper getWrapper() {
-        return wrapper;
+    public Container getContainer() {
+        return container;
     }
 
-    public void setWrapper(SimpleWrapper wrapper) {
-        this.wrapper = wrapper;
+    public void setContainer(Container container) {
+        this.container = container;
     }
 
     public HttpServletRequest getRequest(){

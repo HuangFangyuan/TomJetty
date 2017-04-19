@@ -3,13 +3,15 @@ package com.hfy.tomjetty.server;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.Callable;
 
 /**
  * Created by HuangFangyuan on 2017/4/15.
  */
-public class Processor {
+public class Processor implements Callable<HttpRequestHeader> {
     //保存连接器
     private Connector connector;
+    private SocketChannel socketChannel;
 
     Processor(Connector connector){
         this.connector = connector;
@@ -29,7 +31,7 @@ public class Processor {
             }
             HttpHeaderParser parser = new HttpHeaderParser();
             header = parser.parse(sb.toString());
-            System.out.println(header);
+//            System.out.println(header);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -40,5 +42,18 @@ public class Processor {
             }
             return header;
         }
+    }
+
+    @Override
+    public HttpRequestHeader call() {
+        return process(socketChannel);
+    }
+
+    public SocketChannel getSocketChannel() {
+        return socketChannel;
+    }
+
+    public void setSocketChannel(SocketChannel socketChannel) {
+        this.socketChannel = socketChannel;
     }
 }

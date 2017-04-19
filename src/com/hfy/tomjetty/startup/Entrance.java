@@ -1,10 +1,9 @@
 package com.hfy.tomjetty.startup;
 
 import com.hfy.tomjetty.server.Connector;
-import com.hfy.tomjetty.server.SimpleValve;
-import com.hfy.tomjetty.server.SimpleWrapper;
-
-import java.sql.Wrapper;
+import com.hfy.tomjetty.valve.MethodLogValve;
+import com.hfy.tomjetty.server.StandradWrapper;
+import com.hfy.tomjetty.valve.UrlLogValve;
 
 /**
  * Created by HuangFangyuan on 2017/4/15.
@@ -12,9 +11,11 @@ import java.sql.Wrapper;
 public class Entrance {
     public static void main(String[] args) {
         Connector connector = new Connector();
-        SimpleWrapper wrapper = new SimpleWrapper();
-        wrapper.setBasic(new SimpleValve());
-        connector.setWrapper(wrapper);
+        StandradWrapper wrapper = new StandradWrapper();
+        wrapper.addValve(new MethodLogValve());
+        wrapper.addValve(new UrlLogValve());
+        wrapper.strat();
+        connector.setContainer(wrapper);
         new Thread(connector).start();
     }
 }

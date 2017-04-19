@@ -1,6 +1,6 @@
 package com.hfy.tomjetty.interfaces;
 
-import com.hfy.tomjetty.server.LifecycleEvent;
+import com.hfy.tomjetty.lifecycle.LifecycleEvent;
 
 /**
  * Created by HuangFangyuan on 2017/4/16.

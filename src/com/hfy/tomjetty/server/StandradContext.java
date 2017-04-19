@@ -1,15 +1,20 @@
 package com.hfy.tomjetty.server;
 
 import com.hfy.tomjetty.interfaces.*;
+import com.hfy.tomjetty.valve.StandradWrapperValve;
 
 /**
  * Created by HuangFangyuan on 2017/4/16.
  */
-public class SimpleWrapper implements Container,Pipeline {
+public class StandradContext implements Container,Pipeline,Lifecycle {
 
     private String name;
-    private Pipeline pipeline = new SimplePipeline(this);
+    private Pipeline pipeline = new StandradPipeline(this);
     private Container parent;
+
+    public StandradContext() {
+        setBasic(new StandradWrapperValve());
+    }
 
     @Override
     public void addChild(Container container) {
@@ -74,5 +79,29 @@ public class SimpleWrapper implements Container,Pipeline {
     @Override
     public Container getParent() {
         return parent;
+    }
+
+    @Override
+    public void strat() {
+        System.out.println("wrapper start");
+        if (pipeline instanceof Lifecycle){
+            ((Lifecycle) pipeline).strat();
+        }
+
+    }
+
+    @Override
+    public void stop() {
+
+    }
+
+    @Override
+    public void addLifecycleListener(LifecycleListener listener) {
+
+    }
+
+    @Override
+    public LifecycleListener[] findLifecycleListeners() {
+        return new LifecycleListener[0];
     }
 }
